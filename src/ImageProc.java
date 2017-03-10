@@ -81,7 +81,10 @@ public class ImageProc {
 	
 	//Calculates the magnitude of gradient at each pixel
 	public static BufferedImage gradientMagnitude(BufferedImage img) {
-		//First we should to get img in gray
+		/*First we should to get img in gray that's beacuse we should recieve picture 
+		with black/white/gray colors . Gradient should show only the edge parts in white - the places with the most differences.
+		and black if there is no difference .
+		*/
 		BufferedImage grayScaleImg = grayScale(img);
 		int height = grayScaleImg.getHeight();
 		int width = grayScaleImg.getWidth();
