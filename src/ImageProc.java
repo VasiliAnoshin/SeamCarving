@@ -58,13 +58,13 @@ public class ImageProc {
 	public static BufferedImage grayScale(BufferedImage img) {
 		int height = img.getHeight();
 		int width = img.getWidth();
-		int red, green,blue,grayScale;
+		int red, green,blue,grayScale,argb;
 		BufferedImage out = new BufferedImage(width, height, img.getType());
 		for (int x = 0; x < width; x++){
 			for (int y = 0; y < height; y++){
 				//getRGB -  method returns the RGB value representing the color in the default ARGB ColorModel.
 				//(Bits 24-31 are alpha, 16-23 are red, 8-15 are green, 0-7 are blue)
-				int argb = img.getRGB(x, y);
+				argb = img.getRGB(x, y);
 				red = (argb>>16) & 0xff;
 				green = (argb>>8) & 0xff;
 				blue = (argb) & 0xff;
@@ -81,8 +81,28 @@ public class ImageProc {
 	
 	//Calculates the magnitude of gradient at each pixel
 	public static BufferedImage gradientMagnitude(BufferedImage img) {
-		//TODO implement this
-		return null;
+		//First we should to get img in gray
+		BufferedImage grayScaleImg = grayScale(img);
+		int height = grayScaleImg.getHeight();
+		int width = grayScaleImg.getWidth();
+		int curPixel, upPixel,argbDY,leftPixel, argbDX;		
+		BufferedImage out = new BufferedImage(width, height, grayScaleImg.getType());		
+		for (int x = 1; x < width; x++){	
+			for (int y = 1; y < height; y++){
+				//As we working in gray should take left 8 bits and compute dx/dy				
+				curPixel = grayScaleImg.getRGB(x, y)& 0xff;
+				upPixel = grayScaleImg.getRGB(x, y-1)& 0xff;
+				leftPixel = grayScaleImg.getRGB(x-1, y)& 0xff;
+				
+				argbDY = upPixel - curPixel;
+				argbDX = leftPixel - curPixel;
+				//gradient = sqrt(dx^2 + dy^2)/sqrt(2)
+				curPixel = (int) Math.sqrt(Math.pow(argbDX, 2) + Math.pow(argbDY, 2));				
+				curPixel = (curPixel<<16) | (curPixel<<8) |curPixel;
+				out.setRGB(x, y, curPixel);
+			}
+		}
+		return out;
 	}
 	
 	
