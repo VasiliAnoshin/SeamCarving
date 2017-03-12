@@ -71,13 +71,43 @@ public class Retargeter {
 	
 	//Calculates the order in which seams are extracted
 	private void calculateSeamsOrderMatrix(int k) {
-		//TODO implement this (it is just a suggestion, you can remove this function/change it however you like)
+		//cur MartixWidth
+		int i_calcCurrentWidth;
+		int[][] newOrgPosMat;
+		int[][] costMat;
+		m_seamsOrdMat = new int[m_originalWidth][m_originalHeight];
+		
+		// the img will shrink while processing..
+		i_calcCurrentWidth = m_originalWidth;
+		
+		// add k seams (iSeam index path) to the seamsOrdMat   
+		for (int iSeam=1;	iSeam<=k;	iSeam++) {
+			newOrgPosMat = new int[i_calcCurrentWidth][m_originalHeight];
+			costMat = calculateCostsMatrix(i_calcCurrentWidth);
+		}
 	}
 	
 	//Calculates the cost matrix for a given image width (w).
 	//To be used inside calculateSeamsOrderMatrix().
-	private void calculateCostsMatrix(int w) {
-		//TODO implement this (it is just a suggestion, you can remove this function/change it however you like)
+	private int[][] calculateCostsMatrix(int calcCurrentWidth) {
+		int cL,cR,cV,mL,mV,mR;
+		int[][] costM = new int[calcCurrentWidth][m_originalHeight];
+		
+		for (int x=0; x<calcCurrentWidth; x++) {
+			for (int y=0; y<m_originalHeight; y++) { 
+				costM[x][y] = -1;
+			}
+		}
+		//set corners.
+		costM[0][0] = 1000;
+		costM[calcCurrentWidth-1][0] = 1000;
+		
+		for (int x=1;x<calcCurrentWidth-1;x++) {
+			costM[x][0] = Math.abs(m_grayScaleMat[m_originalPosMat[x-1][0]][0] - m_grayScaleMat[m_originalPosMat[x+1][0]][0]);
+		}
+		
+		return costM; 
 	}
+		
 	
 }
