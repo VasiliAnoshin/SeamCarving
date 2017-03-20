@@ -93,21 +93,72 @@ public class Retargeter {
 		int cL,cR,cV,mL,mV,mR;
 		int[][] costM = new int[calcCurrentWidth][m_originalHeight];
 		
+		//Fill help matrix with -1
 		for (int x=0; x<calcCurrentWidth; x++) {
 			for (int y=0; y<m_originalHeight; y++) { 
 				costM[x][y] = -1;
 			}
-		}
-		//set corners.
+		}		
+		//Set corners (At the two upper corner pixels, you can’t really calculate a cost. Put a value of 1000);
 		costM[0][0] = 1000;
 		costM[calcCurrentWidth-1][0] = 1000;
 		
+		//set upper border  |I(i-1,j ) - I(i+1,j)| compute from grayScalMat
 		for (int x=1;x<calcCurrentWidth-1;x++) {
 			costM[x][0] = Math.abs(m_grayScaleMat[m_originalPosMat[x-1][0]][0] - m_grayScaleMat[m_originalPosMat[x+1][0]][0]);
 		}
+		//forward matrix energy computing
+		for (int y=1;y<m_originalHeight;y++) {
+			for (int x=1;x<calcCurrentWidth-1;x++) {
+				//Calc left, right and vertical path cost
+			
+				cV = Math.abs(m_grayScaleMat[m_originalPosMat[x-1][y]][y] - m_grayScaleMat[m_originalPosMat[x+1][y]][y]);
+			
+				cL = Math.abs(m_grayScaleMat[m_originalPosMat[x][y-1]][y-1] - m_grayScaleMat[m_originalPosMat[x-1][y]][y]);
+			
+				cR = Math.abs(m_grayScaleMat[m_originalPosMat[x][y-1]][y-1] - m_grayScaleMat[m_originalPosMat[x+1][y]][y]);
+				
+				mL = costM[x-1][y-1] + cL + cV;
+				mV = costM[x][y-1] + cV;
+				mR = costM[x+1][y-1] + cR + cV;
+				
+				//set the minimum
+				if ((mL<mR) && (mL<mV)) {
+					costM[x][y] = mL;
+				} else if ((mV<mR) && (mV<mL)) {
+					costM[x][y] = mV;	
+				} else { 
+					costM[x][y] = mR;	
+				}
+			}			
+			//The most left edge pixel (after middle ones were set):
+			mV = costM[0][y-1];
+
+			cR = Math.abs(m_grayScaleMat[m_originalPosMat[0][y-1]][y-1] - m_grayScaleMat[m_originalPosMat[1][y]][y]);
+			
+			mR = costM[1][y-1] + cR;
+			if (mV<mR) 
+				costM[0][y] = mV + costM[1][y];
+			else
+				costM[0][y] = mR + costM[1][y];
+			
+			//the most right edge pixel (after middle ones were set):
+			mV = costM[calcCurrentWidth-1][y-1];
+
+			cL = Math.abs(m_grayScaleMat[m_originalPosMat[calcCurrentWidth-1][y-1]][y-1] - m_grayScaleMat[m_originalPosMat[calcCurrentWidth-2][y]][y]);
+			mL = costM[calcCurrentWidth-2][y-1] + cL;
+			if (mV<mL) 
+				costM[calcCurrentWidth-1][y] = mV + costM[calcCurrentWidth-2][y];
+			else
+				costM[calcCurrentWidth-1][y] = mL + costM[calcCurrentWidth-2][y];
+		}
+		//Tool for debugging - there is no should be -1 in the matrix after construction. 
+		for (int x=0;x<calcCurrentWidth;x++) 
+			for (int y=0;y<m_originalHeight;y++) { 
+				if (costM[x][y] < 0)
+					System.out.println("cost not calc at: (" + x + "," + y +")");
+			}
 		
 		return costM; 
-	}
-		
-	
+	}			
 }
