@@ -28,7 +28,7 @@ import java.io.File;
 import java.util.Vector;
 import javax.swing.JTextArea;
 
-
+@Author(Author = "BenFranklin", date = "19/3/2017")
 @SuppressWarnings("serial")
 public class MainWindow extends JFrame {
 

@@ -3,7 +3,7 @@
 import java.awt.image.BufferedImage;
 
 import java.awt.Color;
-
+@Author(Author = "BenFranklin", date = "19/3/2017")
 public class Retargeter {
 	private BufferedImage m_grayScaleImg;
 	private BufferedImage m_originalImg;

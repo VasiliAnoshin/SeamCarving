@@ -20,7 +20,7 @@ import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-
+@Author(Author = "BenFranklin", date = "19/3/2017")
 @SuppressWarnings("serial")
 public class ImageWindow extends JFrame {
 
