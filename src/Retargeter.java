@@ -2,6 +2,8 @@
 
 import java.awt.image.BufferedImage;
 
+import java.awt.Color;
+
 public class Retargeter {
 	private BufferedImage m_grayScaleImg;
 	private BufferedImage m_originalImg;
@@ -9,6 +11,7 @@ public class Retargeter {
 	private int[][] m_originalPosMat;
 	private int[][] m_grayScaleMat;
 	private int[][] m_seamsOrdMat;
+	private boolean m_isVertical;
 	
 	private int m_originalHeight;
 	private boolean isVertical;
@@ -59,20 +62,64 @@ public class Retargeter {
 	
 	//Does the actual resizing of the image
 	public BufferedImage retarget(int newSize) {
-		//TODO implement this
-		return null;
+		BufferedImage newImg = new BufferedImage(newSize, m_originalHeight,BufferedImage.TYPE_INT_RGB);
+		int shift=0;		
+		int seamCount = Math.abs(m_originalWidth-newSize);
+		//If the newSize is bigger then original
+		if (m_originalWidth < newSize) {
+			// upscaling
+			for (int y=0;y<m_originalHeight;y++) {
+				shift=0;
+				for (int x=0;x<m_originalWidth;x++)
+					if ((m_seamsOrdMat[x][y]>0)&&(m_seamsOrdMat[x][y]<=seamCount)) {
+						// duplicate seam pixels
+						newImg.setRGB(x+shift, y, m_originalImg.getRGB(x, y));
+						shift++;
+						newImg.setRGB(x+shift, y, m_originalImg.getRGB(x, y));
+					} else
+						newImg.setRGB(x+shift, y, m_originalImg.getRGB(x, y));
+			}
+		} else {
+			// downscaling
+			for (int y=0;y<m_originalHeight;y++) {
+				shift=0;
+				for (int x=0;x<m_originalWidth;x++)
+					if ((m_seamsOrdMat[x][y]>0)&&(m_seamsOrdMat[x][y]<=seamCount))
+						// Ignore seam pixels
+						shift++;
+					else
+						newImg.setRGB(x-shift, y, m_originalImg.getRGB(x, y));
+			}
+		}				
+		if (m_isVertical) 
+			return transposeImg(newImg);
+		else
+			return newImg;
 	}
 	
 	//Colors the seams pending for removal/duplication
 	public BufferedImage showSeams(int newSize) {
-		//TODO implement this
-		return null;
+		BufferedImage seamsImg = new BufferedImage(m_originalWidth, m_originalHeight,BufferedImage.TYPE_INT_RGB);
+		int seamCount = Math.abs(m_originalWidth-newSize);
+		for (int y=0;y<m_originalHeight;y++) 
+			for (int x=0;x<m_originalWidth;x++)
+				if ((m_seamsOrdMat[x][y]>0)&&(m_seamsOrdMat[x][y]<=seamCount))
+					seamsImg.setRGB(x, y, Color.RED.getRGB());
+				else
+					seamsImg.setRGB(x, y, m_originalImg.getRGB(x, y));
+		
+		if (m_isVertical) 
+			return transposeImg(seamsImg);
+		else
+			return seamsImg;
 	}
 	
 	//Calculates the order in which seams are extracted
 	private void calculateSeamsOrderMatrix(int k) {
 		//cur MartixWidth
-		int i_calcCurrentWidth;
+		int i_calcCurrentWidth,y,x;
+		int minVal,minX,tmpMinX;
+
 		int[][] newOrgPosMat;
 		int[][] costMat;
 		m_seamsOrdMat = new int[m_originalWidth][m_originalHeight];
@@ -84,6 +131,58 @@ public class Retargeter {
 		for (int iSeam=1;	iSeam<=k;	iSeam++) {
 			newOrgPosMat = new int[i_calcCurrentWidth][m_originalHeight];
 			costMat = calculateCostsMatrix(i_calcCurrentWidth);
+			
+			//first index in the last row
+			minVal = costMat[0][m_originalHeight-1];
+			minX = 0;
+			
+			//find where the minimum seam ends -> start point. From this point start compute the seam.  
+			y=m_originalHeight-1;
+			for (x=1;x<i_calcCurrentWidth;x++) {
+				if (costMat[x][y] < minVal) {
+					minVal = costMat[x][y];
+					minX = x;
+				}
+			}
+			//sets first index of seam in the seam order matrix 
+			m_seamsOrdMat[m_originalPosMat[minX][y]][y]=iSeam;
+			
+			//shift left all pixels right to the seam, for the new original position Matrix
+			for (int i=0;i<minX;i++){
+				newOrgPosMat[i][y] = m_originalPosMat[i][y];
+			}
+			for (int i=minX;i<(i_calcCurrentWidth-1);i++){
+				newOrgPosMat[i][y] = m_originalPosMat[i+1][y];
+			}
+			//trek the min seam up
+			for (;y>=0;--y) { 
+				//find where it came from  
+				tmpMinX = minX;
+				//vertical
+				minVal = costMat[minX][y];
+				//left
+				if ((minX-1>0)&&(costMat[minX-1][y]<minVal)) { 
+					tmpMinX = minX-1;
+					minVal = costMat[tmpMinX][y];
+				}
+				//or right...
+				if ((minX+1<i_calcCurrentWidth) && (costMat[minX+1][y]<minVal))
+					tmpMinX = minX+1;
+				
+				minX = tmpMinX;
+				
+				// sets the seam index at the original pos of it's path
+				m_seamsOrdMat[m_originalPosMat[minX][y]][y]=iSeam;
+				
+				//shift left all x pos of pixels right to the seam, for the new original position Matrix
+				for (int i=0;i<minX;i++)
+					newOrgPosMat[i][y] = m_originalPosMat[i][y];
+				for (int i=minX;i<i_calcCurrentWidth-1;i++)
+					newOrgPosMat[i][y] = m_originalPosMat[i+1][y];
+			}
+			i_calcCurrentWidth--;
+			m_originalPosMat = newOrgPosMat;
+			
 		}
 	}
 	
