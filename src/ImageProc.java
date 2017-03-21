@@ -7,7 +7,7 @@
 import java.awt.image.BufferedImage;
 
 import com.sun.prism.paint.Color;
-
+@Author(Author = "BenFranklin", date = "19/3/2017")
 public class ImageProc {
 
 	//Creates a reduced size image from the original image by taking every <factor>-th pixel in x and y direction
