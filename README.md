@@ -13,5 +13,7 @@ between the current and next vertical pixel. Border conditions can be ignored (j
 Seams can be either vertical or horizontal. A vertical seam is a path of pixels connected from top to bottom in an image with one pixel in each row.[1] A horizontal seam is similar with the exception of the connection being from left to right. The importance/energy function values a pixel by measuring its contrast with its neighbor pixels.
 Computing the seam consists of finding the path of minimum energy cost from one end of the image to another. This is done by Dynamic programming.
 Algorithm : 
-We Start with an image of Lena. 
+We Start with an image of Lena. We then calculate the weight/density/energy of each pixel. This can be done by gradient.
+After we have the energy of the image, we generate a list of seams:
+
 
