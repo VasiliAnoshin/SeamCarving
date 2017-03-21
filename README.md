@@ -16,4 +16,5 @@ We Start with an image of Lena. We then calculate the weight/density/energy of e
 After we have the energy of the image, we generate a list of seams: <br/>
 ![reatgetbyhorizont](https://cloud.githubusercontent.com/assets/9945039/24171621/e217c7dc-0e8d-11e7-94e3-9705e8ecad6b.jpg)<br/>
 We then remove the seams from the image, reducing the size of the image as a result:
-![afterretargeting](https://cloud.githubusercontent.com/assets/9945039/24171751/632be4fc-0e8e-11e7-8bb9-128d1dddd389.jpg)
+![afterretargeting](https://cloud.githubusercontent.com/assets/9945039/24172720/e4cd948a-0e91-11e7-9fc3-889761231d9b.jpg)
+
